@@ -17,16 +17,17 @@ def call(Map config = [:]) {
         sh """
             git config user.name "${gitUserName}"
             git config user.email "${gitUserEmail}"
-        """
 
-        sh """
-            # Update Backend Image
-            sed -i "s|image: adarsh5559/krishbandhu-backend:.*|image: adarsh5559/krishbandhu-backend:${imageTag}|g" ${manifestsPath}/02-backend-deployment.yaml
+            # IMPORTANT: Always sync with remote first
+            git pull --rebase origin main
 
-            # Update Frontend Image
-            sed -i "s|image: adarsh5559/krishbandhu-frontend:.*|image: adarsh5559/krishbandhu-frontend:${imageTag}|g" ${manifestsPath}/03-frontend-deployment.yaml
+            #  Update Backend Image (safer regex)
+            sed -i "s|image:.*krishbandhu-backend:.*|image: adarsh5559/krishbandhu-backend:${imageTag}|g" ${manifestsPath}/02-backend-deployment.yaml
 
-            # Optional: update ingress
+            #  Update Frontend Image (safer regex)
+            sed -i "s|image:.*krishbandhu-frontend:.*|image: adarsh5559/krishbandhu-frontend:${imageTag}|g" ${manifestsPath}/03-frontend-deployment.yaml
+
+            #  Optional: update ingress
             if [ -f "${manifestsPath}/08-ingress.yaml" ]; then
                 sed -i "s|host: .*|host: krishbandhu.adtechs.xyz|g" ${manifestsPath}/08-ingress.yaml
             fi
@@ -38,7 +39,10 @@ def call(Map config = [:]) {
                 git add ${manifestsPath}/*.yaml
                 git commit -m "Update frontend & backend image to ${imageTag} [ci skip]"
 
-                git remote set-url origin https://Adarsh097:$GIT_PASSWORD@github.com/Adarsh097/KrishiBandhu-Deployment.git
+                #  Use credentials safely
+                git remote set-url origin https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/Adarsh097/KrishiBandhu-Deployment.git
+
+                #  Push
                 git push origin HEAD:main
             fi
         """
