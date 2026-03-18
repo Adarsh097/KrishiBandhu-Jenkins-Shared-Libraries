@@ -1,8 +1,3 @@
-#!/usr/bin/env groovy
-
-/**
- * Update Kubernetes manifests with new image tags
- */
 def call(Map config = [:]) {
 
     def imageTag = config.imageTag ?: error("Image tag is required")
@@ -25,29 +20,26 @@ def call(Map config = [:]) {
         """
 
         sh """
-            # Update application deployment
-            sed -i "s|image: adarsh5559/easyshop-app:.*|image: adarsh5559/easyshop-app:${imageTag}|g" ${manifestsPath}/08-easyshop-deployment.yaml
+            # Update Backend Image
+            sed -i "s|image: adarsh5559/krishbandhu-backend:.*|image: adarsh5559/krishbandhu-backend:${imageTag}|g" ${manifestsPath}/02-backend-deployment.yaml
 
-            # Update migration job if exists
-            if [ -f "${manifestsPath}/12-migration-job.yaml" ]; then
-                sed -i "s|image: adarsh5559/easyshop-migration:.*|image: adarsh5559/easyshop-migration:${imageTag}|g" ${manifestsPath}/12-migration-job.yaml
+            # Update Frontend Image
+            sed -i "s|image: adarsh5559/krishbandhu-frontend:.*|image: adarsh5559/krishbandhu-frontend:${imageTag}|g" ${manifestsPath}/03-frontend-deployment.yaml
+
+            # Optional: update ingress
+            if [ -f "${manifestsPath}/08-ingress.yaml" ]; then
+                sed -i "s|host: .*|host: krishbandhu.adtechs.xyz|g" ${manifestsPath}/08-ingress.yaml
             fi
 
-            # Update ingress domain
-            if [ -f "${manifestsPath}/10-ingress.yaml" ]; then
-                sed -i "s|host: .*|host: easyshop.adtechs.xyz|g" ${manifestsPath}/10-ingress.yaml
-            fi
-
+            # Check for changes
             if git diff --quiet; then
                 echo "No changes to commit"
             else
                 git add ${manifestsPath}/*.yaml
-                git commit -m "Update image tag to ${imageTag} [ci skip]"
+                git commit -m "Update frontend & backend image to ${imageTag} [ci skip]"
 
-                git remote set-url origin https://Adarsh097:$GIT_PASSWORD@github.com/Adarsh097/ecommerce-devops-project.git
+                git remote set-url origin https://Adarsh097:$GIT_PASSWORD@github.com/Adarsh097/KrishiBandhu-Deployment.git
                 git push origin HEAD:main
-
-
             fi
         """
     }
