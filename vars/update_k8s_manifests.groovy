@@ -22,14 +22,14 @@ def call(Map config = [:]) {
             git pull --rebase origin main
 
             #  Update Backend Image (safer regex)
-            sed -i "s|image:.*krishbandhu-backend:.*|image: adarsh5559/krishbandhu-backend:${imageTag}|g" ${manifestsPath}/02-backend-deployment.yaml
+            sed -i "s|image:.*krishibandhu-backend:.*|image: adarsh5559/krishibandhu-backend:${imageTag}|g" ${manifestsPath}/02-backend-deployment.yaml
 
             #  Update Frontend Image (safer regex)
-            sed -i "s|image:.*krishbandhu-frontend:.*|image: adarsh5559/krishbandhu-frontend:${imageTag}|g" ${manifestsPath}/03-frontend-deployment.yaml
+            sed -i "s|image:.*krishibandhu-frontend:.*|image: adarsh5559/krishibandhu-frontend:${imageTag}|g" ${manifestsPath}/03-frontend-deployment.yaml
 
             #  Optional: update ingress
             if [ -f "${manifestsPath}/08-ingress.yaml" ]; then
-                sed -i "s|host: .*|host: krishbandhu.adtechs.xyz|g" ${manifestsPath}/08-ingress.yaml
+                sed -i "s|host: .*|host: krishibandhu.adtechs.xyz|g" ${manifestsPath}/08-ingress.yaml
             fi
 
             # Check for changes
